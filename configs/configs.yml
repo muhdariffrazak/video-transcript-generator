@@ -12,9 +12,10 @@ output:
 burn:
   enabled: true                    # default behavior
   position: "bottom"               # bottom, top, middle
-  font_size: 24
+  font_size: 17
   primary_color: "&Hffffff"        # white
   outline_color: "&H000000"        # black outline
+  border_style: 3                   # 3 = boxed subtitles (opaque/semi-transparent background)
   back_color: "&H80000000"         # semi-transparent black background
   margin_v: 20                     # vertical margin from bottom (pixels)
   font_name: "Arial"

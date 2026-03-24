@@ -45,6 +45,7 @@ def burn_subtitles_into_video(
         f"FontSize={burn_config.get('font_size', 24)},"
         f"PrimaryColour={burn_config.get('primary_color', '&Hffffff')},"
         f"OutlineColour={burn_config.get('outline_color', '&H000000')},"
+        f"BorderStyle={burn_config.get('border_style', 3)},"
         f"BackColour={burn_config.get('back_color', '&H80000000')},"
         f"MarginV={burn_config.get('margin_v', 20)},"
         f"Alignment={burn_config.get('alignment', 2)}"
