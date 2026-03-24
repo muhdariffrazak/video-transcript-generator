@@ -1,0 +1,21 @@
+transcription:
+  model: "large-v3"
+  backend: "faster-whisper"
+  device: "cuda"
+  compute_type: "float16"
+
+output:
+  format: "srt"
+  include_timestamps: true
+  include_speakers: true
+
+burn:
+  enabled: true                    # default behavior
+  position: "bottom"               # bottom, top, middle
+  font_size: 24
+  primary_color: "&Hffffff"        # white
+  outline_color: "&H000000"        # black outline
+  back_color: "&H80000000"         # semi-transparent black background
+  margin_v: 20                     # vertical margin from bottom (pixels)
+  font_name: "Arial"
+  alignment: 2                     # 2 = bottom center

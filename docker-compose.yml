@@ -1,0 +1,25 @@
+services:
+  transcript-generator:
+    build: .
+    container_name: video-transcript-generator
+    runtime: nvidia                    # Enables GPU
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    volumes:
+      - ./videos:/videos:ro             # Put your videos here
+      - ./output:/output                # Transcripts will be saved here
+      - ./configs:/app/configs:ro
+      - model_cache:/app/cache/huggingface
+      - temp_data:/app/temp
+    command: transcribe /videos/my_long_video.mp4 --srt /output/my_transcript.srt --output /output/my_long_video_with_subs.mp4
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+volumes:
+  model_cache:
+  temp_data:
