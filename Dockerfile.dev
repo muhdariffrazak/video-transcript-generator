@@ -1,4 +1,4 @@
-FROM nvidia/cuda:12.4.1-cudnn-runtime-ubuntu22.04
+FROM nvidia/cuda:12.4.1-cudnn-devel-ubuntu22.04
 
 ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1 \
@@ -13,16 +13,30 @@ ENV DEBIAN_FRONTEND=noninteractive \
 ARG UID=1000
 ARG GID=1000
 
-# Install system dependencies
+# Install system dependencies including development tools
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3.11 python3.11-dev \
     python3-pip \
     ffmpeg \
     git \
     build-essential \
+    vim \
+    wget \
+    curl \
+    sudo \
     && rm -rf /var/lib/apt/lists/ \
     && mkdir -p /app/cache/huggingface /app/temp \
     && chmod -R 777 /app
+
+# Create dev user with sudo access
+ENV USERNAME=devuser
+RUN if ! getent group ${GID} >/dev/null; then groupadd -g ${GID} devgroup; fi && \
+    useradd -m -u ${UID} -g ${GID} -s /bin/bash ${USERNAME} && \
+    echo "${USERNAME}:${USERNAME}" | chpasswd && \
+    usermod -aG sudo ${USERNAME} && \
+    echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/${USERNAME} && \
+    chmod 0440 /etc/sudoers.d/${USERNAME} && \
+    chown -R ${USERNAME}:${GID} /app
 
 # Install Python dependencies globally 
 WORKDIR /app
@@ -31,34 +45,14 @@ RUN python3.11 -m pip install --upgrade pip wheel && \
     python3.11 -m pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu124 && \
     python3.11 -m pip install -r requirements.txt
 
-WORKDIR /app
-
 # Copy application code
 COPY src/ ./src/
 COPY configs/ ./configs/
 
-# Create non-root user for security (good practice)
-RUN if ! getent group ${GID} >/dev/null; then groupadd -g ${GID} appgroup; fi && \
-    useradd -m -u ${UID} -g ${GID} appuser && \
-    chown -R appuser:${GID} /app
-USER appuser
-
-# Pre-download models on build (optional but speeds up first run)
-RUN python3.11 - <<'PY' || echo "Model download will happen on first run"
-from pathlib import Path
-from faster_whisper import WhisperModel
-
-cache_dir = Path('/app/cache/huggingface')
-model_dir = cache_dir / 'models--large-v3'
-if model_dir.exists():
-    print('Model already cached, skipping download')
-else:
-    model = WhisperModel('large-v3', device='cuda', compute_type='float16')
-    print('Model pre-loaded successfully')
-PY
+# Switch to dev user
+USER ${USERNAME}
 
 VOLUME ["/app/temp", "/videos", "/output"]
 
-# Default command
-ENTRYPOINT ["python3.11", "-m", "src.main"]
-CMD ["--help"]
+# Default command: interactive shell for development
+CMD ["/bin/bash"]

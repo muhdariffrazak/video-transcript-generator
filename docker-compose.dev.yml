@@ -1,9 +1,9 @@
 services:
-  transcript-generator:
+  transcript-generator-dev:
     build:
       context: .
-      dockerfile: Dockerfile
-    container_name: video-transcript-generator
+      dockerfile: Dockerfile.dev
+    container_name: video-transcript-generator-dev
     stdin_open: true
     tty: true
     pull_policy: always
@@ -14,9 +14,9 @@ services:
       - ./videos:/videos:ro             # Put your videos here
       - ./output:/output                # Transcripts will be saved here
       - ./configs:/app/configs:ro
-      - model_cache:/app/cache/huggingface  # Persistent: downloads model once, reuses forever
+      - model_cache:/app/cache/huggingface  # Persistent: shared model cache
       - temp_data:/app/temp             # Persistent: temporary processing files
-    command: transcribe /videos/my_long_video.mp4 --srt /output/my_transcript.srt --output /output/my_long_video_with_subs.mp4
+      - ./src:/app/src                  # Live code updates in dev
     deploy:
       resources:
         reservations:
