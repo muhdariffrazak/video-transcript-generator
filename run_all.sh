@@ -7,9 +7,11 @@ cd "$(dirname "$0")"
 VIDEO_DIR="${1:-videos}"
 
 if [[ ! -d "$VIDEO_DIR" ]]; then
-  echo "Video directory not found: $VIDEO_DIR" >&2
-  exit 1
+  mkdir -p "$VIDEO_DIR"
+  echo "Created missing video directory: $VIDEO_DIR"
 fi
+
+mkdir -p output
 
 echo "Processing videos from: $VIDEO_DIR"
 
